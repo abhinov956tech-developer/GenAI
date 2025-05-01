@@ -10,7 +10,7 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 def get_weather(city: str):
     return "40 degree celcius"
 
-user-query=input('>')
+user_query=input('>')
 
 model = genai.GenerativeModel(
     model_name='gemini-1.5-flash',
