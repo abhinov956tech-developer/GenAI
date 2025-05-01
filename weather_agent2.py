@@ -66,61 +66,61 @@ model = genai.GenerativeModel(
 
 history =[] 
  
-
-user_query=input('>')
-history.append({"role": "user", "parts": [{"text": user_query}]})
-
-chat = model.start_chat(history=history)
-
 while True:
-    try:
-       
-        response = chat.send_message("Continue")
-       # print(response.text)
-        
+    user_query=input('>')
+    history.append({"role": "user", "parts": [{"text": user_query}]})
+    chat = model.start_chat(history=history)
+    if user_query.lower() in ['exit', 'quit']:
+          break  
+    while True:
         try:
-            parsed_output = json.loads(response.text)
+        
+            response = chat.send_message("Continue")
+        # print(response.text)
             
-          
-            if parsed_output.get("step") == "plan":
-                print(f"🧠: {parsed_output.get('content')}")
-            
-            elif parsed_output.get("step") == "action":
-                tool_name = parsed_output.get("function")
-                tool_input = parsed_output.get("input")
+            try:
+                parsed_output = json.loads(response.text)
                 
-                if tool_name in Available_Tools:
-                    output = Available_Tools[tool_name]["fn"](tool_input)
-                    observe_response = {"step": "observe", "output": output}
-                    print(f"🔍: Observation - {output}")
+            
+                if parsed_output.get("step") == "plan":
+                    print(f"🧠: {parsed_output.get('content')}")
+                
+                elif parsed_output.get("step") == "action":
+                    tool_name = parsed_output.get("function")
+                    tool_input = parsed_output.get("input")
                     
-                    
-                    response = chat.send_message(json.dumps(observe_response))
-                    
-                    try:
-                        final_parsed = json.loads(response.text)
-                        if final_parsed.get("step") == "output":
-                            print(f"🤖: {final_parsed.get('content')}")
-                    except json.JSONDecodeError:
-                        print("Error parsing response")
+                    if tool_name in Available_Tools:
+                        output = Available_Tools[tool_name]["fn"](tool_input)
+                        observe_response = {"step": "observe", "output": output}
+                        print(f"🔍: Observation - {output}")
                         
-            elif parsed_output.get("step") == "output": 
-                print(f"🤖: {parsed_output.get('content')}")
-                
-            elif parsed_output.get("step") == "done":
+                        
+                        response = chat.send_message(json.dumps(observe_response))
+                        
+                        try:
+                            final_parsed = json.loads(response.text)
+                            if final_parsed.get("step") == "output":
+                                print(f"🤖: {final_parsed.get('content')}")
+                        except json.JSONDecodeError:
+                            print("Error parsing response")
+                            
+                elif parsed_output.get("step") == "output": 
+                    print(f"🤖: {parsed_output.get('content')}")
+                    
+                elif parsed_output.get("step") == "done":
+                    break
+                    
+            except json.JSONDecodeError:
+                print("Error: Could not parse response as JSON")
                 break
                 
-        except json.JSONDecodeError:
-            print("Error: Could not parse response as JSON")
+        except Exception as e:
+            print(f"Error: {str(e)}")
+            if "429" in str(e) or "quota" in str(e).lower():
+                print("Rate limit hit. Waiting 60 seconds before trying again...")
+                time.sleep(60)  
+                continue
             break
-            
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        if "429" in str(e) or "quota" in str(e).lower():
-            print("Rate limit hit. Waiting 60 seconds before trying again...")
-            time.sleep(60)  
-            continue
-        break
         
     
    
