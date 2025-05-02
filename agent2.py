@@ -17,10 +17,23 @@ def get_weather(city: str):
         return f"The weather in {city} is {response.text}."
     return "Something went wrong"
 
-
+#def run_command(command: str):
+    #result=os.system(command)
+   # return f"Command executed with result code: {result}"
+   
 def run_command(command: str):
-    result=os.system(command)
-    return f"Command executed with result code: {result}"
+    try:
+        
+        import subprocess
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            output = result.stdout if result.stdout else "Command executed successfully"
+            return output
+        else:
+            return f"Error (code {result.returncode}): {result.stderr}"
+    except Exception as e:
+        return f"Exception occurred: {str(e)}"
 
 
 Available_Tools= {
@@ -64,7 +77,7 @@ model = genai.GenerativeModel(
     - run_command: Takes a command as input to execute on system and returns ouput
     
     
-    Example:
+    Example 1:
     User Query: What is the weather of New York?
     Output: { "step": "plan", "content": "The user is interested in weather data of New York" }
     Output: { "step": "plan", "content": "From the available tools I should call get_weather" }
@@ -74,14 +87,6 @@ model = genai.GenerativeModel(
     Output: { "step": "done", "content": "Done" }
 
     Example 2:
-     User Query: What is the name of the owl that harry potter had?
-    Output: {{ "step": "plan", "content": "The user is curious for knowing the name of the harry potter owl " }}
-    Output: {{ "step": "plan", "content": "From the available tools I should call get_book" }}
-    Output: {{ "step": "action", "function": "get_book" }}
-    Output: {{ "step": "observe", "output": "Hedwig" }}
-    Output: {{ "step": "output", "content": "The name of Harry potter owl is Hedwig" }}
-
-    Example 3:
      User Query: Create a python file named hello.py in the Langgraph folder
     Output: { "step": "plan", "content": "I need to create a python file named hello.py in the Langgraph folder" }
     Output: { "step": "plan", "content": "From the available tools I will use run_command to execute shell commands" }
@@ -91,7 +96,8 @@ model = genai.GenerativeModel(
     Output: { "step": "done", "content": "Done" }
     """,
  generation_config={
-        "response_mime_type": "application/json"
+        "response_mime_type": "application/json",
+        "temperature": 0.2
     },
  
 )

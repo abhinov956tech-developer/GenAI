@@ -23,10 +23,6 @@ def get_book():
     books = response.json()
     return books
 
-def run_command(command: str):
-    result=os.system(command)
-    return f"Command executed with result code: {result}"
-
 
 Available_Tools= {
 "get_weather":{
@@ -36,10 +32,6 @@ Available_Tools= {
 "get_books":{
 "fn": get_book,
 "description":"Takes a user query regarding Harry potter characters or any stories plot and returns with a answer"
-},
-"run_command":{
-    "fn":run_command,
-    "description":"Takes a command as input to execute on system and returns ouput"
 }
 }
 
@@ -89,7 +81,6 @@ model = genai.GenerativeModel(
     Output: {{ "step": "observe", "output": "Hedwig" }}
     Output: {{ "step": "output", "content": "The name of Harry potter owl is Hedwig" }}
 
-    
     """,
  generation_config={
         "response_mime_type": "application/json"
