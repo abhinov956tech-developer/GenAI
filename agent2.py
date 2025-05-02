@@ -18,11 +18,6 @@ def get_weather(city: str):
     return "Something went wrong"
 
 
-def get_book():
-    response = requests.get('https://potterapi-fedeperin.vercel.app/en/books')
-    books = response.json()
-    return books
-
 def run_command(command: str):
     result=os.system(command)
     return f"Command executed with result code: {result}"
@@ -33,10 +28,7 @@ Available_Tools= {
 "fn": get_weather,
 "description":"Takes a city name as an input and returns the current weather for the city"
 },
-"get_books":{
-"fn": get_book,
-"description":"Takes a user query regarding Harry potter characters or any stories plot and returns with a answer"
-},
+
 "run_command":{
     "fn":run_command,
     "description":"Takes a command as input to execute on system and returns ouput"
@@ -70,7 +62,7 @@ model = genai.GenerativeModel(
      Available Tools:
     - get_weather: Takes a city name as an input and returns the current weather for the city
     - run_command: Takes a command as input to execute on system and returns ouput
-    - get_book: Takes a user query regarding Harry potter characters or any stories plot and returns with a answer
+    
     
     Example:
     User Query: What is the weather of New York?
