@@ -23,6 +23,11 @@ def get_book():
     books = response.json()
     return books
 
+def run_command(command: str):
+    result=os.system(command)
+    return f"Command executed with result code: {result}"
+
+
 Available_Tools= {
 "get_weather":{
 "fn": get_weather,
@@ -31,6 +36,10 @@ Available_Tools= {
 "get_books":{
 "fn": get_book,
 "description":"Takes a user query regarding Harry potter characters or any stories plot and returns with a answer"
+},
+"run_command":{
+    "fn":run_command,
+    "description":"Takes a command as input to execute on system and returns ouput"
 }
 }
 
@@ -46,13 +55,16 @@ model = genai.GenerativeModel(
     - Follow the Output JSON Format.
     - Always perform one step at a time and wait for next input
     - Carefully analyse the user query
+    - Always include all required fields in your JSON responses.
+    - For action steps, always include both "function" and "input" fields.
+    - Finish with an output step that summarizes the result for the user in natural language.
 
     Output JSON Format:
     {{
-        "step": "string",
-        "content": "string",
-        "function": "The name of function if the step is action",
-        "input": "The input parameter for the function",
+    "step": "string",
+    "content": "string",
+    "function": "The name of function if the step is action",
+    "input": "The input parameter for the function"
     }}
 
      Available Tools:
@@ -61,20 +73,24 @@ model = genai.GenerativeModel(
     - get_book: Takes a user query regarding Harry potter characters or any stories plot and returns with a answer
     
     Example:
-    User Query: What is the weather of new york?
-    Output: {{ "step": "plan", "content": "The user is interseted in weather data of new york" }}
-    Output: {{ "step": "plan", "content": "From the available tools I should call get_weather" }}
-    Output: {{ "step": "action", "function": "get_weather", "input": "new york" }}
-    Output: {{ "step": "observe", "output": "12 Degree Cel" }}
-    Output: {{ "step": "output", "content": "The weather for new york seems to be 12 degrees." }}
+    User Query: What is the weather of New York?
+    Output: { "step": "plan", "content": "The user is interested in weather data of New York" }
+    Output: { "step": "plan", "content": "From the available tools I should call get_weather" }
+    Output: { "step": "action", "function": "get_weather", "input": "New York" }
+    Output: { "step": "observe", "output": "12 Degree Celsius" }
+    Output: { "step": "output", "content": "The weather for New York seems to be 12 degrees Celsius." }
+    Output: { "step": "done", "content": "Done" }
 
+    Example 2:
      User Query: What is the name of the owl that harry potter had?
     Output: {{ "step": "plan", "content": "The user is curious for knowing the name of the harry potter owl " }}
     Output: {{ "step": "plan", "content": "From the available tools I should call get_book" }}
-    Output: {{ "step": "action", "function": "get_book", "input": "Hedwig" }}
+    Output: {{ "step": "action", "function": "get_book" }}
     Output: {{ "step": "observe", "output": "Hedwig" }}
     Output: {{ "step": "output", "content": "The name of Harry potter owl is Hedwig" }}
-""",
+
+    
+    """,
  generation_config={
         "response_mime_type": "application/json"
     },
