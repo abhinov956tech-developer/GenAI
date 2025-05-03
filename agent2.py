@@ -1,5 +1,6 @@
 import json
 from dotenv import load_dotenv
+from langsmith import traceable
 import google.generativeai as genai
 import os
 import time
@@ -8,6 +9,8 @@ load_dotenv()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
+
+@traceable
 def get_weather(city: str):
     print("🔨 Tool Called: get_weather", city)
     url = f"https://wttr.in/{city}?format=%C+%t"
@@ -20,7 +23,7 @@ def get_weather(city: str):
 #def run_command(command: str):
     #result=os.system(command)
    # return f"Command executed with result code: {result}"
-   
+@traceable
 def run_command(command: str):
     try:
         
