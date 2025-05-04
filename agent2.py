@@ -1,6 +1,8 @@
 import json
 from dotenv import load_dotenv
 from langsmith import traceable
+from langsmith.wrappers import wrap_openai
+from langsmith import Client
 import google.generativeai as genai
 import os
 import time
@@ -9,7 +11,19 @@ load_dotenv()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
+langsmith_client=Client()
 
+def trace_gemini_call(model_name, prompt, response_text):
+    """Trace a single Gemini API call in LangSmith"""
+    langsmith_client.create_run(
+        name="Gemini Generate",
+        run_type="llm",
+        inputs={"model": model_name, "prompt": prompt},
+        outputs={"response": response_text},
+        tags=["gemini"]
+    )
+
+  
 @traceable
 def get_weather(city: str):
     print("🔨 Tool Called: get_weather", city)
@@ -50,6 +64,7 @@ Available_Tools= {
     "description":"Takes a command as input to execute on system and returns ouput"
 }
 }
+
 
 model = genai.GenerativeModel(
     model_name='gemini-1.5-flash',
