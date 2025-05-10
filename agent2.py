@@ -13,13 +13,14 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 langsmith_client=Client()
 
-def trace_gemini_call(model_name, prompt, response_text):
+def trace_gemini_call(model_name, prompt, response_text,system_instruction):
     """Trace a single Gemini API call in LangSmith"""
     langsmith_client.create_run(
-        name="Gemini Generate",
+        name="Gemini",
         run_type="llm",
         inputs={"model": model_name, "prompt": prompt},
         outputs={"response": response_text},
+        system_prompt=[system_instruction],
         tags=["gemini"]
     )
 
