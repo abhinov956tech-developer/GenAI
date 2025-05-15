@@ -1,5 +1,6 @@
 import json
 from dotenv import load_dotenv
+from langsmith import traceable
 import google.generativeai as genai
 import os
 import time
@@ -8,6 +9,7 @@ load_dotenv()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
+@traceable
 def get_weather(city: str):
     print("🔨 Tool Called: get_weather", city)
     url = f"https://wttr.in/{city}?format=%C+%t"
@@ -17,7 +19,7 @@ def get_weather(city: str):
         return f"The weather in {city} is {response.text}."
     return "Something went wrong"
 
-
+@traceable
 def get_book():
     response = requests.get('https://potterapi-fedeperin.vercel.app/en/books')
     books = response.json()
