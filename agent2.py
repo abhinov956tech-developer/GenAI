@@ -14,13 +14,12 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 langsmith_client=Client()
 
 def trace_gemini_call(model_name, prompt, response_text,system_instruction):
-    """Trace a single Gemini API call in LangSmith"""
     langsmith_client.create_run(
-        name="Gemini",
+        name="ChatGemini",
         run_type="llm",
         inputs={"model": model_name, "prompt": prompt},
         outputs={"response": response_text},
-        system_prompt=[system_instruction],
+        extra={"system_prompt": system_instruction},
         tags=["gemini"]
     )
 
@@ -66,10 +65,7 @@ Available_Tools= {
 }
 }
 
-
-model = genai.GenerativeModel(
-    model_name='gemini-1.5-flash',
-    system_instruction= """You are an AI Assistant who is specialized in resolving user query.
+system_instruction= """You are an AI Assistant who is specialized in resolving user query.
     You work on start, plan, action, observe mode.
     For the given user query and available tools, plan the step by step execution, based on the planning,
     select the relevant tool from the available tool. and based on the tool selection you perform an action to call the tool.
@@ -113,7 +109,11 @@ model = genai.GenerativeModel(
     Output: { "step": "observe", "output": "Command executed with result code: 0" }
     Output: { "step": "output", "content": "The python file hello.py has been created in the Langgraph folder." }
     Output: { "step": "done", "content": "Done" }
-    """,
+    """
+
+model = genai.GenerativeModel(
+    model_name='gemini-1.5-flash',
+    system_instruction=system_instruction,
  generation_config={
         "response_mime_type": "application/json",
         "temperature": 0.2
@@ -136,6 +136,13 @@ while True:
             
                 response = chat.send_message("Continue")
                 # print(response.text)
+
+                trace_gemini_call(
+                    model_name="gemini-1.5-flash",
+                    prompt=user_query if len(history) == 1 else "Continue",
+                    response_text=response.text,
+                    system_instruction=system_instruction
+                )
                 
                 try:
                     parsed_output = json.loads(response.text)
@@ -155,6 +162,13 @@ while True:
                             
                             
                             response = chat.send_message(json.dumps(observe_response))
+
+                            trace_gemini_call(
+                            model_name="gemini-1.5-flash",
+                            prompt=json.dumps(observe_response),
+                            response_text=response.text,
+                            system_instruction=system_instruction
+                        )
                             
                             try:
                                 final_parsed = json.loads(response.text)
